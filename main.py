@@ -21,7 +21,10 @@ class Mapa():
 
     def get_camaradas_totais(self):
         return self.camaradas_totais
-
+    
+    def get_mensagem_conclusao(self):
+        return f"paraberns você completo o mapa {self.nome_mapa}"
+    
     def get_porcentagem_concluida(self):
         return round(self.camaradas_conquistados / self.camaradas_totais *100,2)
 
@@ -57,7 +60,12 @@ def print_hud(objeto_mapa):
 def level_up(mapa_atual):
     pass
 
-def interface(mapa_atual):
+def interface(config):
+    
+    mapas = config["mapas"]
+    mapa_atual_config = mapas[config["mapa_atual"]]
+    mapa_atual = mapa_atual_config["obj"]
+    
     options = mapa_atual.get_lista_mapa()
     selected_option = 0
 
@@ -77,7 +85,43 @@ def interface(mapa_atual):
             else:
                 print("  ", option)
 
-        keyboard_key = keyboard.read_event(suppress=True).name
+        keyboard_key = keyboard.read_event(suppress=False).name
+        
+        if mapa_atual.get_porcentagem_concluida() == 100:
+            os.system('cls')
+
+            print(mapa_atual.get_mensagem_conclusao())        
+            
+            time.sleep(1)
+
+            print(config)
+            print("Pressione [ENTER] para seguir para continuar!")
+            keyboard.wait('enter')
+
+            
+            if mapa_atual_config["proximo"]:
+                
+                proximo_mapa_config = mapas[mapa_atual_config["proximo"]]
+                
+                config["mapa_atual"] = mapa_atual_config["proximo"]
+                mapa_atual_config = proximo_mapa_config
+                mapa_atual = proximo_mapa_config["obj"]
+                
+                continue
+            else:
+                os.system('cls')
+                print("Parabens Você finalizou o jogo")
+                print("Pressione [ENTER] para sair.")
+                
+                time.sleep(1)
+                
+                keyboard.wait('enter')
+                keyboard.unhook_all()
+                
+                break
+            
+            
+            
 
         # Processar a entrada do usuário
         if keyboard_key == ('up'):
@@ -101,5 +145,21 @@ def interface(mapa_atual):
 array_fabrica = ["Sabotagem","Discursar","Trabalhar Duro"]
 
 fabrica = Mapa('Fabrica',80,0,array_fabrica)
+escritorio = Mapa('Escritorio',80,0,array_fabrica)
 
-interface(fabrica)
+
+config = {
+    "mapa_atual": "fabrica",
+    "mapas": {
+        "fabrica": {
+            "obj": fabrica,
+            "proximo": "escritorio"
+        },
+        "escritorio": {
+            "obj": escritorio,
+            "proximo": False
+        }
+    }
+}
+
+interface(config)
