@@ -39,9 +39,12 @@ class Mapa():
 
 class Jogador():
 
-    def __init__(self,carisma,força,agilidade,):
-        pass
-
+    def __init__(self,nome,carisma,força,agilidade,sorte):
+        self.nome = nome
+        self.carisma = carisma
+        self.força = força
+        self.agilidade = agilidade
+        self.sorte = sorte
 
 
 def print_hud(objeto_mapa):
@@ -58,12 +61,19 @@ def level_up(mapa_atual):
     pass
 
 def interface(mapa_atual):
-    options = mapa_atual.get_lista_mapa()
-    selected_option = 0
+    status_menu = True
+    options = mapa_atual.get_lista_mapa() #Recebe o item da lista do mapa.
+    selected_option = 0 #Valor que corresponde a qual item esta selecionado
+    mapas_desbloqueados = ["Fabrica","Loja","Gerencia"]
+
 
     print_hud(mapa_atual)
 
     while True:
+        if status_menu == True:
+            options = mapa_atual.get_lista_mapa()
+        elif status_menu == False:
+            options = mapas_desbloqueados
         time.sleep(0.1)
         # Limpar a tela
         os.system('cls')
@@ -71,6 +81,8 @@ def interface(mapa_atual):
         print_hud(mapa_atual)
 
         # Exibir as opções do menu
+
+
         for i, option in enumerate(options):
             if i == selected_option:
                 print(">>", option)
@@ -87,19 +99,21 @@ def interface(mapa_atual):
         elif keyboard_key == ('enter'):
             # Executar a ação correspondente à opção selecionada
             if selected_option == 0:
-                mapa_atual.set_camaradas(10)
-                # BEGIN: Opção 1
+                print ("Opção 1 selecionada.")
+                # BEGIN: Opção 1 DO JOGO
             elif selected_option == 1:
                 print("Opção 2 selecionada")
-                # BEGIN: Opção 2
+                # BEGIN: Opção 2 DO JOGO
             elif selected_option == 2:
+                status_menu = (True if status_menu == False else False)
+                # BEGIN: Opção 3 DO JOGO
+            elif selected_option == 3:
+                print ("Opção 4 selecionada")
+            elif selected_option == 4:
                 print("Opção 3 selecionada")
-                # BEGIN: Opção 3
 
+array_fabrica = ["Sabotagem","Discursar","Trabalhar Duro"] #Esse Array esta aqui somente para testes.
 
-
-array_fabrica = ["Sabotagem","Discursar","Trabalhar Duro"]
-
-fabrica = Mapa('Fabrica',80,0,array_fabrica)
+fabrica = Mapa('Fabrica',80,0,array_fabrica) #Cria o Objeto Fabrica
 
 interface(fabrica)
