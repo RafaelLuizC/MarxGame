@@ -39,7 +39,6 @@ class Mapa():
             self.detec_comunista = (self.detec_comunista + novo_valor)
 
 class Jogador():
-
     def __init__(self,nome,carisma,força,agilidade,sorte):
         self.nome = nome
         self.carisma = carisma
@@ -62,6 +61,12 @@ class Jogador():
     def get_sorte(self):
         return self.sorte
 
+def checador_de_conclusao(objeto_mapa):
+    if (objeto_mapa.get_porcentagem_concluida()) > 100:
+        return True
+    else:
+        return False
+
 def print_hud(objeto_mapa):
     print ("\n\n")
 
@@ -72,17 +77,11 @@ def print_hud(objeto_mapa):
 
     print ("\n\n")
 
-def level_up(mapa_atual, nome_mapa, mapas_desbloqueados):
-    # Verifica se o nome do mapa já está na lista de mapas desbloqueados
-    if mapa_atual.get_nome_mapa() not in mapas_desbloqueados:
-        mapas_desbloqueados.append(mapa_atual.get_nome_mapa())
-
 def interface(mapa_atual):
     status_menu = True
     options = mapa_atual.get_lista_mapa() #Recebe o item da lista do mapa.
     selected_option = 0 #Valor que corresponde a qual item esta selecionado
-    mapas_desbloqueados = ["Fabrica","Loja","Gerencia"]
-
+    mapas_desbloqueados = ["Fabrica","Loja","Escritorio","Gerencia","Presidencia","Voltar"]
 
     print_hud(mapa_atual)
 
@@ -99,7 +98,6 @@ def interface(mapa_atual):
 
         # Exibir as opções do menu
 
-
         for i, option in enumerate(options):
             if i == selected_option:
                 print(">>", option)
@@ -107,6 +105,11 @@ def interface(mapa_atual):
                 print("  ", option)
             
         keyboard_key = keyboard.read_event(suppress=True).name
+
+        if checador_de_conclusao(mapa_atual) == True:
+            break
+        elif checador_de_conclusao(mapa_atual) == False:
+            pass
 
         # Processar a entrada do usuário
         if keyboard_key == ('up'):
@@ -117,35 +120,43 @@ def interface(mapa_atual):
             # Executar a ação correspondente à opção selecionada
             if selected_option == 0:
                 if status_menu == False:
-                    print("Voce esta no lugar certo")
+                    mapa_atual = fabrica
                 else:
                     print("Opção 1 selecionada")
-                    # BEGIN: Opção 1 DO JOGO
+                    mapa_atual.set_camaradas(10)
 
             elif selected_option == 1:
                 if status_menu == False:
-                    print("Voce esta no lugar certo")
+                    mapa_atual = loja
                 else:
                     print("Opção 2 selecionada")
                     # BEGIN: Opção 2 DO JOGO
 
             elif selected_option == 2:
                 if status_menu == False:
-                    print("Voce esta no lugar certo")
+                    mapa_atual = escritorio
                 else:
                     print("Opção 3 selecionada")
                     # BEGIN: Opção 3 DO JOGO                    
 
             elif selected_option == 3:
                 if status_menu == False:
-                    print("Voce esta no lugar certo")
+                    mapa_atual = gerencia
                 else:
                     print("Opção 4 selecionada")
                     # BEGIN: Opção 4 DO JOGO
             elif selected_option == 4:
-                status_menu = (True if status_menu == False else False)
-            level_up(mapa_atual, mapa_atual.get_nome_mapa(), mapas_desbloqueados)
+                if status_menu == False:
+                    mapa_atual = chefes
+                else:
+                    status_menu = (True if status_menu == False else False)
+            elif selected_option == 5:
+                if status_menu == False:
+                    status_menu = (True if status_menu == False else False)
 
+def main():
+    for mapa in lista_de_mapas:
+        interface(mapa)
 
 ##############################################################################################
 
@@ -193,4 +204,6 @@ array_texto_chefes = ["Influencia as decisões da alta cúpula para favorecer os
                     "Dá discursos estratégicos durante eventos importantes, compartilhando ideias revolucionárias.",
                     "Coordena ações ousadas para desestabilizar completamente a alta cúpula e seus interesses."]
 
-interface(fabrica)
+lista_de_mapas = [fabrica,loja,escritorio,gerencia,chefes]
+
+main()
