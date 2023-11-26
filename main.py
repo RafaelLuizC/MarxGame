@@ -2,6 +2,9 @@ import keyboard
 import time
 import os
 import random
+import pyfiglet
+import curses
+import textwrap
 
 class Mapa():
     
@@ -64,6 +67,106 @@ class Jogador():
     
     def get_sorte(self):
         return self.sorte
+
+###################
+
+def func_janela_texto(text,tempo_sleep):
+    # Inicializa a janela
+    stdscr = curses.initscr()
+    
+    # Obtém as dimensões do terminal
+    term_height, term_width = stdscr.getmaxyx()
+
+    print(term_height, term_width)
+
+    # Define as dimensões da janela
+    height = min(200, term_height - 2)
+    width = min(110, term_width - 2)
+
+    # Define as margens
+    margin_y = min(15, (term_height - height) // 2)
+    margin_x = min(15, (term_width - width) // 2)
+
+    # Cria uma nova janela com as dimensões e margens especificadas
+    win = curses.newwin(height, width, margin_y, margin_x)
+
+    # Divide o texto em linhas
+    lines = textwrap.wrap(text, width - 2 * margin_x)
+
+    # Calcula o número de páginas
+    pages = len(lines) // (height - 2 * margin_y) + 1
+
+    for page in range(pages):
+        # Limpa a janela
+        win.clear()
+
+        # Imprime cada linha do texto
+        for i in range(height - 2 * margin_y):
+            # Calcula o índice da linha
+            index = page * (height - 2 * margin_y) + i
+
+            # Verifica se o índice é válido
+            if index < len(lines):
+                # Imprime a linha na posição calculada
+                win.addstr(margin_y + i, margin_x, lines[index])
+
+        # Atualiza a janela para mostrar o texto
+        win.refresh()
+
+    if type(tempo_sleep) == str:
+        stdscr.getch()
+    else:
+        time.sleep(tempo_sleep)
+
+    # Finaliza a janela
+    curses.endwin()
+
+    #text - Recebe o valor do texto
+    #gerar_ascii - Recebe True/False para checar se o texto deve ser formatado para ASCII.
+    #tempo_sleep - Checa quanto tempo vai ficar parado. 
+
+def func_janela_ASCII(text,gerar_ascii,tempo_sleep):
+    os.system('cls')
+    # Inicializa a janela
+    stdscr = curses.initscr()
+
+    if gerar_ascii == True: #Função que serve para gerar um ascii, caso venha True na Variavel gerar_ascii, ele formata para art.
+        #Caso falso, ele imprime no centro da tela.
+        ascii_font = pyfiglet.figlet_format(text)
+        text = ascii_font
+    
+    # Obtém as dimensões da janela
+    height, width = stdscr.getmaxyx()
+
+    # Divide o texto em linhas
+    lines = text.split('\n')
+
+    # Calcula a linha inicial para centralizar o texto verticalmente
+    start_line = (height - len(lines)) // 2
+    
+    # Limpa a janela
+    stdscr.clear()
+
+    # Imprime cada linha do texto
+    for i, line in enumerate(lines):
+        # Calcula a coluna inicial para centralizar o texto horizontalmente
+        start_col = (width - len(line)) // 2
+
+        # Imprime a linha na posição calculada
+        stdscr.addstr(start_line + i, start_col, line)
+
+    # Atualiza a janela para mostrar o texto
+    stdscr.refresh()
+
+    # Aguarda o usuário pressionar uma tecla para sair
+    if type(tempo_sleep) == str:
+        stdscr.getch()
+    else:
+        time.sleep(tempo_sleep)
+
+    # Finaliza a janela
+    curses.endwin()
+
 
 def checador_de_conclusao(objeto_mapa):
     if (objeto_mapa.get_porcentagem_concluida()) >= 100:
@@ -171,6 +274,9 @@ def interface(mapa_atual):
 
 def main():
     for mapa in lista_de_mapas:
+        func_janela_ASCII("A Revolucao de Fulano",True,"AGUARDAR_TECLA")
+        func_janela_ASCII("Parte 1: A Descoberta",True,3)
+        func_janela_texto(string_intro,"AGUARDAR_TECLA")
         mapas_desbloqueados.append(mapa.get_nome_mapa())
         interface(mapa)
 
@@ -179,6 +285,9 @@ def main():
 #Variaveis Globais.
 
 ##############################################################################################
+
+
+string_intro = (f"Fulano, um estoquista de uma poderosa corporação na cidade de Havana, capital de Cuba, trabalhava tranquilamente em seu turno quando encontrou um antigo livro empoeirado de Karl Marx especificamente o 'Manifesto do Partido Comunista'. Após procurar sem sucesso pelo proprietário e movido pela curiosidade que se instala diante dessa descoberta, ele decidiu levá-lo para casa e ler.                 \n Ao mergulhar na leitura do 'Manifesto do Partido Comunista', Fulano se deparou com uma análise contundente da sociedade dividida em classes, destacando a luta histórica entre proletários e burgueses. A cada página, sua incredulidade cresce diante dos fatos mencionados, especialmente a exploração do trabalhador pela classe capitalista. Fulano reflete sobre como seu próprio trabalho é explorado, percebendo a falta de repartição igualitária e os direitos ignorados.")
 
 
 array_texto_fabrica = ["Você intensifica seu trabalho nas linhas de produção, aumentando a eficiência da fábrica.",
