@@ -1,6 +1,7 @@
 import keyboard
 import time
 import os
+import random
 
 class Mapa():
     
@@ -46,6 +47,20 @@ class Jogador():
         self.agilidade = agilidade
         self.sorte = sorte
 
+    def get_nome(self):
+        return self.nome
+    
+    def get_carisma(self):
+        return self.carisma
+    
+    def get_força(self):
+        return self.força
+
+    def get_agilidade(self):
+        return self.agilidade
+    
+    def get_sorte(self):
+        return self.sorte
 
 def print_hud(objeto_mapa):
     print ("\n\n")
@@ -57,8 +72,10 @@ def print_hud(objeto_mapa):
 
     print ("\n\n")
 
-def level_up(mapa_atual):
-    pass
+def level_up(mapa_atual, nome_mapa, mapas_desbloqueados):
+    # Verifica se o nome do mapa já está na lista de mapas desbloqueados
+    if mapa_atual.get_nome_mapa() not in mapas_desbloqueados:
+        mapas_desbloqueados.append(mapa_atual.get_nome_mapa())
 
 def interface(mapa_atual):
     status_menu = True
@@ -88,7 +105,7 @@ def interface(mapa_atual):
                 print(">>", option)
             else:
                 print("  ", option)
-
+            
         keyboard_key = keyboard.read_event(suppress=True).name
 
         # Processar a entrada do usuário
@@ -99,21 +116,81 @@ def interface(mapa_atual):
         elif keyboard_key == ('enter'):
             # Executar a ação correspondente à opção selecionada
             if selected_option == 0:
-                print ("Opção 1 selecionada.")
-                # BEGIN: Opção 1 DO JOGO
+                if status_menu == False:
+                    print("Voce esta no lugar certo")
+                else:
+                    print("Opção 1 selecionada")
+                    # BEGIN: Opção 1 DO JOGO
+
             elif selected_option == 1:
-                print("Opção 2 selecionada")
-                # BEGIN: Opção 2 DO JOGO
+                if status_menu == False:
+                    print("Voce esta no lugar certo")
+                else:
+                    print("Opção 2 selecionada")
+                    # BEGIN: Opção 2 DO JOGO
+
             elif selected_option == 2:
-                status_menu = (True if status_menu == False else False)
-                # BEGIN: Opção 3 DO JOGO
+                if status_menu == False:
+                    print("Voce esta no lugar certo")
+                else:
+                    print("Opção 3 selecionada")
+                    # BEGIN: Opção 3 DO JOGO                    
+
             elif selected_option == 3:
-                print ("Opção 4 selecionada")
+                if status_menu == False:
+                    print("Voce esta no lugar certo")
+                else:
+                    print("Opção 4 selecionada")
+                    # BEGIN: Opção 4 DO JOGO
             elif selected_option == 4:
-                print("Opção 3 selecionada")
+                status_menu = (True if status_menu == False else False)
+            level_up(mapa_atual, mapa_atual.get_nome_mapa(), mapas_desbloqueados)
 
-array_fabrica = ["Sabotagem","Discursar","Trabalhar Duro"] #Esse Array esta aqui somente para testes.
 
-fabrica = Mapa('Fabrica',80,0,array_fabrica) #Cria o Objeto Fabrica
+##############################################################################################
+
+#Variaveis Globais.
+
+##############################################################################################
+
+array_fabrica = ["Produção Intensiva","Desmontar Máquinas de Forma Sutil","Espalhar Ideias Subversivas", "Organizar Greves Setoriais","Voltar"]
+fabrica = Mapa('Fabrica',80,0,array_fabrica)
+
+array_loja = ["Atendimento Exemplar", "Desacelerar Caixas Registradoras", "Conversas Revolucionárias com Clientes", "Paralisação Simbólica","Voltar"]
+loja = Mapa('Loja', 60, 0, array_loja)
+
+array_escritorio = ["Eficiência Administrativa", "Falsificação de Documentos", "Palestras Motivacionais Subversivas", "Vazamento Estratégico de Informações","Voltar"]
+escritorio = Mapa('Escritorio', 40, 0, array_escritorio)
+
+array_gerencia = ["Alianças Estratégicas", "Desestabilizar Hierarquia de Forma Sutil", "Reuniões de Alto Impacto", "Desobediência Civil na Administração","Voltar"]
+gerencia = Mapa('Gerencia', 20, 0, array_gerencia)
+
+array_chefes = ["Manipulação de Decisões Estratégicas", "Infiltrar-se em Eventos de Elite", "Discursos Subversivos na Alta Cúpula", "Desestabilização Total","Voltar"]
+chefes = Mapa('Alta Cúpula da Empresa', 10, 0, array_chefes)
+
+array_texto_fabrica = ["Você intensifica seu trabalho nas linhas de produção, aumentando a eficiência da fábrica.",
+                       "Sabotagem discreta nas máquinas para causar pequenos atrasos, sem chamar muita atenção.",
+                       "Durante as pausas, você sutilmente compartilha ideias revolucionárias com os colegas.",
+                       "Planeja e lidera greves em setores específicos, impactando a produção de maneira estratégica."]
+
+array_texto_loja = ["Oferece um atendimento excepcional aos clientes, mantendo a operação da loja eficiente.",
+                    "Sabota as caixas registradoras de forma atrasar sutilmente as transações",
+                    "Durante o atendimento, compartilha ideias revolucionárias de forma disfarçada com os clientes.",
+                    "Organiza uma paralisação simbólica na loja, chamando a atenção para as condições de trabalho."]
+
+array_texto_escritorio = ["Aprimora os processos administrativos para melhorar a eficiência do escritório.",
+                    "Sabota documentos para criar pequenos obstáculos burocráticos.",
+                    "Organiza palestras motivacionais com mensagens revolucionárias sutis.",
+                    "Vaza informações estratégicas para minar a estabilidade administrativa."] 
+
+array_texto_gerencia = ["Estabelece alianças estratégicas com membros da alta cúpula para influenciar decisões.",
+                    "Atua nos bastidores para minar a hierarquia gerencial de maneira disfarçada.",
+                    "Organiza reuniões estratégicas para discutir ideias revolucionárias de maneira sutil.",
+                    "Coordena ações de desobediência civil dentro da gerência para impactar a estrutura administrativa."]
+
+array_texto_chefes = ["Influencia as decisões da alta cúpula para favorecer os interesses revolucionários.",
+                    "Infiltre-se em eventos de elite para obter informações e minar a confiança interna.",
+                    "Dá discursos estratégicos durante eventos importantes, compartilhando ideias revolucionárias.",
+                    "Coordena ações ousadas para desestabilizar completamente a alta cúpula e seus interesses."]
 
 interface(fabrica)
