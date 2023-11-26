@@ -94,7 +94,6 @@ def interface(config):
             
             time.sleep(1)
 
-            print(config)
             print("Pressione [ENTER] para seguir para continuar!")
             keyboard.wait('enter')
 
