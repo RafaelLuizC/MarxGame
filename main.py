@@ -38,18 +38,21 @@ class Mapa():
 
     def set_camaradas(self,soma_valor):
         self.camaradas_conquistados = (self.camaradas_conquistados + soma_valor)
+        if self.camaradas_conquistados < 0:
+            self.camaradas_conquistados = 0
 
     def set_detec_comunista(self,novo_valor):
-        if novo_valor < 0:
-            self.detec_comunista = (self.detec_comunista - novo_valor)
-        else:
-            self.detec_comunista = (self.detec_comunista + novo_valor)
+        #caso o valor seja negativo, ele vai subtrair, caso seja positivo, vai somar.
+        self.detec_comunista = (self.detec_comunista + novo_valor)
+        if self.detec_comunista < 0:
+            self.detec_comunista = 0
+
 
 class Jogador():
-    def __init__(self,nome,carisma,força,agilidade,sorte):
+    def __init__(self,nome,carisma,forca,agilidade,sorte):
         self.nome = nome
         self.carisma = carisma
-        self.força = força
+        self.forca = forca
         self.agilidade = agilidade
         self.sorte = sorte
 
@@ -59,16 +62,25 @@ class Jogador():
     def get_carisma(self):
         return self.carisma
     
-    def get_força(self):
-        return self.força
+    def get_forca(self):
+        return self.forca
 
     def get_agilidade(self):
         return self.agilidade
     
     def get_sorte(self):
         return self.sorte
+    
+    def set_agilidade(self, agilidade):
+        self.agilidade += agilidade
 
+    def set_carisma(self, carisma):
+        self.carisma += carisma
+    
+    def set_forca(self, forca):
+        self.forca += forca
 ###################
+
 
 def func_janela_texto(text,tempo_sleep):
     # Inicializa a janela
@@ -168,7 +180,7 @@ def print_hud(objeto_mapa):
     print ("\n\n\n")
 
     print (f'   Local: {objeto_mapa.get_nome_mapa()}')
-    print (f'   Trabalhadores: {objeto_mapa.get_camaradas_totais()}')
+    print (f'   Experiencia: {objeto_mapa.get_camaradas_totais()}')
     print (f'   Porcentagem Camarada: {objeto_mapa.get_porcentagem_concluida()}.% {"/"} 100.%')
     print (f'   Detector de Comunistas: {objeto_mapa.get_detec_comunista()} [{"x"*(objeto_mapa.get_detec_comunista()//10)+" "*((100-objeto_mapa.get_detec_comunista())//10)}]')
 
@@ -176,12 +188,64 @@ def print_hud(objeto_mapa):
     print("-" * 130)
     print ("\n\n")
     
-def game_over_check(mapa):
-    if mapa.detec_comunista >= 100:
-        func_janela_ASCII("Voce foi descoberto!",True,5,"invita")
-        func_janela_ASCII("GAME OVER",True,10,"epic")
-        return True
+## Objeto Jogador Teste
+jogador = Jogador("Fulano", carisma=5, forca=5, agilidade=5, sorte=5)
+### Ações possiveis no jogo
 
+
+def trabalhar_duro(jogador, mapa):
+    aleatoriedade = random.randint(1, 10)
+    mapa.set_camaradas(-aleatoriedade)
+    mapa.set_detec_comunista(-(jogador.get_forca())*2)
+
+def sabotagem(jogador, mapa):  
+    sorte = jogador.get_sorte() / 10
+    agilidade = jogador.get_agilidade()
+    
+    status = ( (agilidade * 4 ) + ( sorte * 6 ) ) / 10
+    aleatoriedade = random.randint(1, 10)
+    
+    if aleatoriedade <= status:
+        mapa.set_camaradas(aleatoriedade*4)
+        func_janela_texto("Ninguem viu sua sabotagem, somente os camaradas!Você ganhou pontos com eles, bom trabalho!", "AGUARDAR_TECLA")
+    else:
+        mapa.set_camaradas(aleatoriedade*3)
+        mapa.set_detec_comunista(aleatoriedade*3)
+        func_janela_texto("Você foi pego durante a sabotagem... Os camaradas ficaram mais desmotivados em seguir você.", "AGUARDAR_TECLA")
+    jogador.set_agilidade(1)
+        
+def discurso(jogador, mapa):
+    carisma = jogador.get_carisma()
+    sorte = jogador.get_sorte()
+    
+    status = ( (carisma * 4 ) + ( sorte * 6 ) ) / 10
+    aleatoriedade = random.randint(1, 10)
+    
+    if aleatoriedade <= status: 
+        mapa.set_camaradas(status*4)
+        func_janela_texto("Ótimo discurso! Os camaradas se sentiram mais motivados em seguir suas ideias.", "AGUARDAR_TECLA")
+    else:
+        mapa.set_detec_comunista(aleatoriedade*3) 
+        mapa.set_camaradas(aleatoriedade)
+        func_janela_texto("Péssimo discurso...\n\nVocê se perdeu nas palavras, os camaradas não gostaram das ideias e acabaram reportando os gestores.\n", "AGUARDAR_TECLA")
+        
+    jogador.set_carisma(1)
+
+def greve(mapa):
+
+    ## Tem 10% de chance de dar ruim    
+    aleatoriedada = random.randint(1, 10)
+    
+    if aleatoriedada == 1:
+        func_janela_texto("A greve foi um sucesso! Os gestores cederam as demandas dos trabalhadores e a empresa se tornou um lugar melhor para se trabalhar.", "AGUARDAR_TECLA")
+        mapa.set_detec_comunista((aleatoriedada*3))
+        mapa.set_camaradas(aleatoriedada*10)
+    else:
+        func_janela_texto("A greve foi um fracasso... Os gestores não cederam as demandas dos trabalhadores e a empresa continuou um lugar ruim para se trabalhar.", "AGUARDAR_TECLA")
+        mapa.set_camaradas(aleatoriedada*2)
+        mapa.set_detec_comunista(aleatoriedada*10)
+
+    
 def interface(mapa_atual):
     status_menu = True
     options = mapa_atual.get_lista_mapa() #Recebe o item da lista do mapa.
@@ -216,7 +280,6 @@ def interface(mapa_atual):
             print (f'\n\n')
             print("-" * 130)
 
-        keyboard_key = keyboard.read_event(suppress=True).name
 
         if checador_de_conclusao(mapa_atual) == True:
             if mapa_atual.get_nome_mapa() not in mapas_concluidos:
@@ -230,6 +293,8 @@ def interface(mapa_atual):
         if game_over_check(mapa_atual) == True:
             break
 
+        keyboard_key = keyboard.read_event(suppress=True).name
+
         # Processar a entrada do usuário
         if keyboard_key == ('up'):
             selected_option = (selected_option - 1) % len(options)
@@ -242,32 +307,28 @@ def interface(mapa_atual):
                     mapa_atual = fabrica
                     status_menu = (True if status_menu == False else False)
                 else:
-                    print("Opção 1 selecionada")
-                    mapa_atual.set_camaradas(10)
-
+                    trabalhar_duro(jogador, mapa_atual)
             elif selected_option == 1:
                 if status_menu == False:
                     mapa_atual = loja
                     status_menu = (True if status_menu == False else False)
                 else:
-                    print("Opção 2 selecionada")
-                    mapa_atual.set_detec_comunista(10)
+                    sabotagem(jogador, mapa_atual)
 
             elif selected_option == 2:
                 if status_menu == False:
                     mapa_atual = escritorio
                     status_menu = (True if status_menu == False else False)
                 else:
-                    print("Opção 3 selecionada")
-                    # BEGIN: Opção 3 DO JOGO                    
+                    discurso(jogador, mapa_atual)                   
 
             elif selected_option == 3:
                 if status_menu == False:
                     mapa_atual = gerencia
                     status_menu = (True if status_menu == False else False)
                 else:
-                    print("Opção 4 selecionada")
-                    # BEGIN: Opção 4 DO JOGO
+                    greve(mapa_atual)
+                    
             elif selected_option == 4:
                 if status_menu == False:
                     mapa_atual = chefes
@@ -283,36 +344,48 @@ def func_inicializar_mapa(mapa):
     interface(mapa)
     if game_over_check(mapa) == True:
         return True
-    func_janela_ASCII("Voce Foi Promovido!",True,5)
+    func_janela_ASCII("Voce Foi Promovido!",True,5,0)
+
+    
+def game_over_check(mapa):
+    if mapa.detec_comunista >= 100:
+        func_janela_ASCII("Voce foi descoberto!",True,5,1)
+        func_janela_ASCII("GAME OVER",True,10,"epic")
+        return True
+
 
 def main():
     for mapa in lista_de_mapas:
         if mapa.get_nome_mapa() == "Fabrica":
             func_janela_ASCII("A Revolucao de Fulano",True,"AGUARDAR_TECLA","slant")
-            func_janela_ASCII("Parte 1 : A Descoberta",True,3,1)
+            func_janela_ASCII("Parte 1 : A Descoberta",True,3,0)
             func_janela_texto(introducao_fulano_part_1,"AGUARDAR_TECLA")
             func_janela_texto(introducao_fulano_part_2,"AGUARDAR_TECLA")
-            func_janela_ASCII("Parte 2 : A Consciencia",True,3,1)
+            func_janela_ASCII("Parte 2 : A Consciencia",True,3,0)
             func_janela_texto(introducao_fulano_part_3,"AGUARDAR_TECLA")
-            func_janela_ASCII("Parte 3 : Momento de Agir",True,3,1)
+            func_janela_ASCII("Parte 3 : Momento de Agir",True,3,0)
             func_janela_texto(introducao_fulano_part_4,"AGUARDAR_TECLA")
             func_janela_texto(introducao,"AGUARDAR_TECLA")
             func_janela_texto(momento_1,"AGUARDAR_TECLA")
             if func_inicializar_mapa(mapa) == True:
                 break
         if mapa.get_nome_mapa() == "Loja":
+            func_janela_ASCII("Loja",True,4,1)
             func_janela_texto(momento_2,"AGUARDAR_TECLA")
             if func_inicializar_mapa(mapa) == True:
                 break
         if mapa.get_nome_mapa() == "Escritorio":
+            func_janela_ASCII("Escritorio",True,4,1)
             func_janela_texto(momento_3,"AGUARDAR_TECLA")
             if func_inicializar_mapa(mapa) == True:
                 break
         if mapa.get_nome_mapa() == "Gerencia":
+            func_janela_ASCII("Gerencia",True,4,1)
             func_janela_texto(momento_4,"AGUARDAR_TECLA")
             if func_inicializar_mapa(mapa) == True:
                 break
         if mapa.get_nome_mapa() == "Alta Cúpula da Empresa":
+            func_janela_ASCII("A Presidencia",True,4,1)
             func_janela_texto(momento_5,"AGUARDAR_TECLA")
             if func_inicializar_mapa(mapa) == True:
                 break
@@ -370,16 +443,16 @@ array_fabrica = ["Produção Intensiva","Desmontar Máquinas de Forma Sutil","Es
 fabrica = Mapa('Fabrica',80,0,array_fabrica,array_texto_fabrica)
 
 array_loja = ["Atendimento Exemplar", "Desacelerar Caixas Registradoras", "Conversas Revolucionárias com Clientes", "Paralisação Simbólica","Voltar"]
-loja = Mapa('Loja', 60, 0, array_loja,array_texto_loja)
+loja = Mapa('Loja', 130, 0, array_loja,array_texto_loja)
 
 array_escritorio = ["Eficiência Administrativa", "Falsificação de Documentos", "Palestras Motivacionais Subversivas", "Vazamento Estratégico de Informações","Voltar"]
-escritorio = Mapa('Escritorio', 40, 0, array_escritorio,array_texto_escritorio)
+escritorio = Mapa('Escritorio', 200, 0, array_escritorio,array_texto_escritorio)
 
 array_gerencia = ["Alianças Estratégicas", "Desestabilizar Hierarquia de Forma Sutil", "Reuniões de Alto Impacto", "Desobediência Civil na Administração","Voltar"]
-gerencia = Mapa('Gerencia', 20, 0, array_gerencia,array_texto_gerencia)
+gerencia = Mapa('Gerencia', 300, 0, array_gerencia,array_texto_gerencia)
 
 array_chefes = ["Manipulação de Decisões Estratégicas", "Infiltrar-se em Eventos de Elite", "Discursos Subversivos na Alta Cúpula", "Desestabilização Total","Voltar"]
-chefes = Mapa('Alta Cúpula da Empresa', 10, 0, array_chefes,array_texto_chefes)
+chefes = Mapa('Alta Cúpula da Empresa', 500, 0, array_chefes,array_texto_chefes)
 
 lista_de_mapas = [fabrica,loja,escritorio,gerencia,chefes]
 
