@@ -200,7 +200,7 @@ jogador = Jogador("Fulano", carisma=5, forca=5, agilidade=5, sorte=5)
 
 def trabalhar_duro(jogador, mapa):
     aleatoriedade = random.randint(1, 10)
-    mapa.set_camaradas(50)
+    mapa.set_camaradas(-aleatoriedade)
     mapa.set_detec_comunista(-(jogador.get_forca())*2)
     func_janela_texto("A produção sobe consideravelmente graças ao seu empenho, mas as pausas para conversas amigáveis ficam escassas. Os colegas notam a mudança.", "AGUARDAR_TECLA")
 
@@ -370,7 +370,7 @@ questoes = {
         "resposta": "proletariado"
     },
     "Escritorio": {
-        "pergunta": "Sou um sistema ideal, onde a propriedade é coletiva, e a distribuição é baseada nas necessidades individuais. O que sou? ",
+        "pergunta": "Sou um sistema ideal, onde a propriedade é coletiva, e a distribuição é baseada nas necessidades coletivas. O que sou? ",
         "resposta": "comunismo"
     },
     "Gerencia": {
