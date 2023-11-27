@@ -74,66 +74,56 @@ def func_janela_texto(text,tempo_sleep):
     # Inicializa a janela
     stdscr = curses.initscr()
     
-    # Obtém as dimensões do terminal
-    term_height, term_width = stdscr.getmaxyx()
-
-    print(term_height, term_width)
-
-    # Define as dimensões da janela
-    height = min(200, term_height - 2)
-    width = min(110, term_width - 2)
-
-    # Define as margens
-    margin_y = min(15, (term_height - height) // 2)
-    margin_x = min(15, (term_width - width) // 2)
-
-    # Cria uma nova janela com as dimensões e margens especificadas
-    win = curses.newwin(height, width, margin_y, margin_x)
+    # Obtém as dimensões da janela
+    height, width = stdscr.getmaxyx()
 
     # Divide o texto em linhas
-    lines = textwrap.wrap(text, width - 2 * margin_x)
+    lines = text.split('\n')
 
-    # Calcula o número de páginas
-    pages = len(lines) // (height - 2 * margin_y) + 1
+    lines = textwrap.wrap(text, width - 20)
+    # Calcula a linha inicial para centralizar o texto verticalmente
+    start_line = (height - len(lines)) // 2
+    
+    # Limpa a janela
+    stdscr.clear()
 
-    for page in range(pages):
-        # Limpa a janela
-        win.clear()
+    # Imprime cada linha do texto
+    for i, line in enumerate(lines):
+        # Calcula a coluna inicial para centralizar o texto horizontalmente
+        start_col = (width - len(line)) // 2
 
-        # Imprime cada linha do texto
-        for i in range(height - 2 * margin_y):
-            # Calcula o índice da linha
-            index = page * (height - 2 * margin_y) + i
+        # Imprime a linha na posição calculada
+        stdscr.addstr(start_line + i, start_col, line)
 
-            # Verifica se o índice é válido
-            if index < len(lines):
-                # Imprime a linha na posição calculada
-                win.addstr(margin_y + i, margin_x, lines[index])
+    #Imprime um botão para continuar
 
-        # Atualiza a janela para mostrar o texto
-        win.refresh()
+    # Atualiza a janela para mostrar o texto
+    stdscr.refresh()
 
+
+    # Aguarda o usuário pressionar uma tecla para sair
     if type(tempo_sleep) == str:
-        stdscr.getch()
+        time.sleep(1)
+        stdscr.addstr(start_line + 8, (width - len("Pressione qualquer tecla para continuar")) // 2, " >> Pressione qualquer tecla para continuar")
+        stdscr.refresh()
+        keyboard.wait('enter')
     else:
         time.sleep(tempo_sleep)
 
     # Finaliza a janela
     curses.endwin()
 
-    #text - Recebe o valor do texto
-    #gerar_ascii - Recebe True/False para checar se o texto deve ser formatado para ASCII.
-    #tempo_sleep - Checa quanto tempo vai ficar parado. 
-
-def func_janela_ASCII(text,gerar_ascii,tempo_sleep):
-    os.system('cls')
+def func_janela_ASCII(text,gerar_ascii,tempo_sleep,fonte):
     # Inicializa a janela
     stdscr = curses.initscr()
 
     if gerar_ascii == True: #Função que serve para gerar um ascii, caso venha True na Variavel gerar_ascii, ele formata para art.
-        #Caso falso, ele imprime no centro da tela.
-        ascii_font = pyfiglet.figlet_format(text)
-        text = ascii_font
+        if type(fonte) == str:
+            ascii_font = pyfiglet.figlet_format(text,font = fonte)
+            text = ascii_font
+        else:
+            ascii_font = pyfiglet.figlet_format(text)
+            text = ascii_font
     
     # Obtém as dimensões da janela
     height, width = stdscr.getmaxyx()
@@ -167,7 +157,6 @@ def func_janela_ASCII(text,gerar_ascii,tempo_sleep):
     # Finaliza a janela
     curses.endwin()
 
-
 def checador_de_conclusao(objeto_mapa):
     if (objeto_mapa.get_porcentagem_concluida()) >= 100:
         return True
@@ -175,14 +164,23 @@ def checador_de_conclusao(objeto_mapa):
         return False
 
 def print_hud(objeto_mapa):
-    print ("\n\n")
+    print("-" * 130)
+    print ("\n\n\n")
 
-    print (f'Local: {objeto_mapa.get_nome_mapa()}\n')
-    print (f'Trabalhadores: {objeto_mapa.get_camaradas_totais()}\n')
-    print (f'Porcentagem Camarada: {objeto_mapa.get_porcentagem_concluida()}\n')
-    print (f'Detector de Comunistas: {objeto_mapa.get_detec_comunista()}')
+    print (f'   Local: {objeto_mapa.get_nome_mapa()}')
+    print (f'   Trabalhadores: {objeto_mapa.get_camaradas_totais()}')
+    print (f'   Porcentagem Camarada: {objeto_mapa.get_porcentagem_concluida()}.% {"/"} 100.%')
+    print (f'   Detector de Comunistas: {objeto_mapa.get_detec_comunista()} [{"x"*(objeto_mapa.get_detec_comunista()//10)+" "*((100-objeto_mapa.get_detec_comunista())//10)}]')
 
+    print ("\n")
+    print("-" * 130)
     print ("\n\n")
+    
+def game_over_check(mapa):
+    if mapa.detec_comunista >= 100:
+        func_janela_ASCII("Voce foi descoberto!",True,5,"invita")
+        func_janela_ASCII("GAME OVER",True,10,"epic")
+        return True
 
 def interface(mapa_atual):
     status_menu = True
@@ -206,13 +204,18 @@ def interface(mapa_atual):
 
         for i, option in enumerate(options):
             if i == selected_option:
-                print(">>", option)
+                print(f' >> {option}'.center(130))
             else:
-                print("  ", option)
+                print(f'    {option}'.center(130))
         
         if status_menu == True:
-            print (f'\n\n\n {mapa_atual.get_mensagem_acoes(selected_option)}')
-            
+            #Printa uma linha para separar o menu das ações
+            print (f'\n\n')
+            print("-" * 130)
+            print (f'\n\n   {mapa_atual.get_mensagem_acoes(selected_option)}')
+            print (f'\n\n')
+            print("-" * 130)
+
         keyboard_key = keyboard.read_event(suppress=True).name
 
         if checador_de_conclusao(mapa_atual) == True:
@@ -223,6 +226,9 @@ def interface(mapa_atual):
                 pass
         elif checador_de_conclusao(mapa_atual) == False:
             pass
+        
+        if game_over_check(mapa_atual) == True:
+            break
 
         # Processar a entrada do usuário
         if keyboard_key == ('up'):
@@ -245,7 +251,7 @@ def interface(mapa_atual):
                     status_menu = (True if status_menu == False else False)
                 else:
                     print("Opção 2 selecionada")
-                    # BEGIN: Opção 2 DO JOGO
+                    mapa_atual.set_detec_comunista(10)
 
             elif selected_option == 2:
                 if status_menu == False:
@@ -272,13 +278,45 @@ def interface(mapa_atual):
                 if status_menu == False:
                     status_menu = (True if status_menu == False else False)
 
+def func_inicializar_mapa(mapa):
+    mapas_desbloqueados.append(mapa.get_nome_mapa())
+    interface(mapa)
+    if game_over_check(mapa) == True:
+        return True
+    func_janela_ASCII("Voce Foi Promovido!",True,5)
+
 def main():
     for mapa in lista_de_mapas:
-        func_janela_ASCII("A Revolucao de Fulano",True,"AGUARDAR_TECLA")
-        func_janela_ASCII("Parte 1: A Descoberta",True,3)
-        func_janela_texto(string_intro,"AGUARDAR_TECLA")
-        mapas_desbloqueados.append(mapa.get_nome_mapa())
-        interface(mapa)
+        if mapa.get_nome_mapa() == "Fabrica":
+            func_janela_ASCII("A Revolucao de Fulano",True,"AGUARDAR_TECLA","slant")
+            func_janela_ASCII("Parte 1 : A Descoberta",True,3,1)
+            func_janela_texto(introducao_fulano_part_1,"AGUARDAR_TECLA")
+            func_janela_texto(introducao_fulano_part_2,"AGUARDAR_TECLA")
+            func_janela_ASCII("Parte 2 : A Consciencia",True,3,1)
+            func_janela_texto(introducao_fulano_part_3,"AGUARDAR_TECLA")
+            func_janela_ASCII("Parte 3 : Momento de Agir",True,3,1)
+            func_janela_texto(introducao_fulano_part_4,"AGUARDAR_TECLA")
+            func_janela_texto(introducao,"AGUARDAR_TECLA")
+            func_janela_texto(momento_1,"AGUARDAR_TECLA")
+            if func_inicializar_mapa(mapa) == True:
+                break
+        if mapa.get_nome_mapa() == "Loja":
+            func_janela_texto(momento_2,"AGUARDAR_TECLA")
+            if func_inicializar_mapa(mapa) == True:
+                break
+        if mapa.get_nome_mapa() == "Escritorio":
+            func_janela_texto(momento_3,"AGUARDAR_TECLA")
+            if func_inicializar_mapa(mapa) == True:
+                break
+        if mapa.get_nome_mapa() == "Gerencia":
+            func_janela_texto(momento_4,"AGUARDAR_TECLA")
+            if func_inicializar_mapa(mapa) == True:
+                break
+        if mapa.get_nome_mapa() == "Alta Cúpula da Empresa":
+            func_janela_texto(momento_5,"AGUARDAR_TECLA")
+            if func_inicializar_mapa(mapa) == True:
+                break
+        
 
 ##############################################################################################
 
@@ -287,8 +325,16 @@ def main():
 ##############################################################################################
 
 
-string_intro = (f"Fulano, um estoquista de uma poderosa corporação na cidade de Havana, capital de Cuba, trabalhava tranquilamente em seu turno quando encontrou um antigo livro empoeirado de Karl Marx especificamente o 'Manifesto do Partido Comunista'. Após procurar sem sucesso pelo proprietário e movido pela curiosidade que se instala diante dessa descoberta, ele decidiu levá-lo para casa e ler.                 \n Ao mergulhar na leitura do 'Manifesto do Partido Comunista', Fulano se deparou com uma análise contundente da sociedade dividida em classes, destacando a luta histórica entre proletários e burgueses. A cada página, sua incredulidade cresce diante dos fatos mencionados, especialmente a exploração do trabalhador pela classe capitalista. Fulano reflete sobre como seu próprio trabalho é explorado, percebendo a falta de repartição igualitária e os direitos ignorados.")
-
+introducao_fulano_part_1 = (f"Fulano, um estoquista de uma poderosa corporação na cidade de Havana, capital de Cuba, trabalhava tranquilamente em seu turno quando encontrou um antigo livro empoeirado de Karl Marx especificamente o 'Manifesto do Partido Comunista'. Após procurar sem sucesso pelo proprietário e movido pela curiosidade que se instala diante dessa descoberta, ele decidiu levá-lo para casa e ler.")
+introducao_fulano_part_2 = (f"Ao mergulhar na leitura do 'Manifesto do Partido Comunista', Fulano se deparou com uma análise contundente da sociedade dividida em classes, destacando a luta histórica entre proletários e burgueses. A cada página, sua incredulidade cresce diante dos fatos mencionados, especialmente a exploração do trabalhador pela classe capitalista. Fulano reflete sobre como seu próprio trabalho é explorado, percebendo a falta de repartição igualitária e os direitos ignorados. ")
+introducao_fulano_part_3 = (f"Fulano passou semanas refletindo sobre o que havia lido. A cada dia que passa, as prateleiras que ele organiza parecem carregar não apenas produtos, mas também a história da exploração que ele agora acompanha. Ele começou a notar como seu próprio trabalho era explorado. Ele percebe que longas horas de trabalho e a dedicação ao seu cargo não são recompensadas de maneira justa, não tinha participação nas decisões da empresa e era tratado como uma peça descartável. Fulano também começou a perceber como a sociedade em geral era desigual. Os ricos eram cada vez mais ricos, enquanto os pobres eram cada vez mais pobres.")
+introducao_fulano_part_4 = (f"A análise do manifesto não apenas ilumina as contradições da sociedade em que Fulano está inserido, mas também incita uma chama de resistência dentro dele. Ele queria lutar por mudanças. Após semanas de reflexão, Fulano decide agir. Ele inicia sua jornada de conscientização abordando os colegas de trabalho. A luta pela justiça social começa nos bastidores, onde Fulano compartilha sua nova consciência, motivando seus colegas a enxergarem além das aparências da liberdade ilusória que a empresa oferece.")
+introducao = (f"Fulano, agora desesperado com a realidade da exploração do trabalho, decide iniciar sua jornada de conscientização a partir de seus colegas. Seu primeiro alvo é o auxiliar de limpeza, uma figura que muitas vezes é invisível, mas essencial para o funcionamento da corporação.")
+momento_1 = (f"Fulano decidiu compartilhar suas descobertas, buscando o auxiliar de limpeza nos cantos mais esquecidos da empresa. Entre baldes e vassouras, ele começa a explicar as ideias de Marx, ressaltando como as bases da sociedade capitalista afetam até mesmo aqueles que muitas vezes passam despercebidos. Será necessário superar obstáculos para convencer o colega de trabalho sobre a importância de unir forças.")
+momento_2 = (f"O próximo passo é convencer os Vendedores, que embora sejam mais expostos ao público, muitas vezes são vítimas de uma grande competitividade . Fulano dotado do conhecimento que adquiriu, explora os corredores da empresa para encontrar os vendedores. Ele ressalta como a busca incessante por lucro impacta não apenas os trabalhadores, como também a qualidade dos produtos e serviços oferecidos.")
+momento_3 = (f"A batalha agora se intensifica ao chegar no supervisor de vendas. Eles muitas vezes são uma ponte entre a base e a gestão. Fulano precisa encontrar maneiras de driblar a resistência e mostrar como a luta pela igualdade beneficia a todos, inclusive aqueles em posições específicas. Estratégia e persuasão serão fundamentais nesse desafio.")
+momento_4 = (f"Ao chegar na gerência, Fulano se depara com um desafio de confrontar aqueles que estão mais próximos da liderança. Aqui, ele precisa de argumentos sólidos e articulados sobre como uma mudança no sistema não apenas beneficiaria os trabalhadores,mas também contribuiria para uma gestão mais eficiente e justa. Será necessário enfrentar a pressão e as ameaças para alcançar os que mais tem poder.")
+momento_5 = (f"O confronto final acontece no topo de toda corporação, onde Fulano busca sensibilizar o Chefe da empresa. Aqui ele deve apresentar propostas concretas para uma transformação estrutural que vai muito além de interesses individuais. A narrativa termina em uma escolha crucial que determinará o destino da empresa e o impacto nas vidas dos trabalhadores.")
 
 array_texto_fabrica = ["Você intensifica seu trabalho nas linhas de produção, aumentando a eficiência da fábrica.",
                        "Sabotagem discreta nas máquinas para causar pequenos atrasos, sem chamar muita atenção.",
