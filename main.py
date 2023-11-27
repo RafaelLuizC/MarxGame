@@ -183,7 +183,12 @@ def print_hud(objeto_mapa):
     print (f'   Experiencia: {objeto_mapa.get_camaradas_totais()}')
     print (f'   Porcentagem Camarada: {objeto_mapa.get_porcentagem_concluida()}.% {"/"} 100.%')
     print (f'   Detector de Comunistas: {objeto_mapa.get_detec_comunista()} [{"x"*(objeto_mapa.get_detec_comunista()//10)+" "*((100-objeto_mapa.get_detec_comunista())//10)}]')
-
+    print("-" * 130)
+    print (f'   Pontos de Carisma: {jogador.get_carisma()}')
+    print (f'   Pontos de Força: {jogador.get_forca()}')
+    print (f'   Pontos de Agilidade: {jogador.get_agilidade()}')
+    print (f'   Pontos de Sorte: {jogador.get_sorte()}')
+    
     print ("\n")
     print("-" * 130)
     print ("\n\n")
@@ -197,6 +202,7 @@ def trabalhar_duro(jogador, mapa):
     aleatoriedade = random.randint(1, 10)
     mapa.set_camaradas(-aleatoriedade)
     mapa.set_detec_comunista(-(jogador.get_forca())*2)
+    func_janela_texto("A produção sobe consideravelmente graças ao seu empenho, mas as pausas para conversas amigáveis ficam escassas. Os colegas notam a mudança.", "AGUARDAR_TECLA")
 
 def sabotagem(jogador, mapa):  
     sorte = jogador.get_sorte() / 10
@@ -237,13 +243,13 @@ def greve(mapa):
     aleatoriedada = random.randint(1, 10)
     
     if aleatoriedada == 1:
-        func_janela_texto("A greve foi um sucesso! Os gestores cederam as demandas dos trabalhadores e a empresa se tornou um lugar melhor para se trabalhar.", "AGUARDAR_TECLA")
         mapa.set_detec_comunista((aleatoriedada*3))
         mapa.set_camaradas(aleatoriedada*10)
+        func_janela_texto("A greve foi um sucesso! Os gestores cederam as demandas dos trabalhadores e a empresa se tornou um lugar melhor para se trabalhar.", "AGUARDAR_TECLA")
     else:
-        func_janela_texto("A greve foi um fracasso... Os gestores não cederam as demandas dos trabalhadores e a empresa continuou um lugar ruim para se trabalhar.", "AGUARDAR_TECLA")
         mapa.set_camaradas(aleatoriedada*2)
         mapa.set_detec_comunista(aleatoriedada*10)
+        func_janela_texto("A greve foi um fracasso... Os gestores não cederam as demandas dos trabalhadores e a empresa continuou um lugar ruim para se trabalhar.", "AGUARDAR_TECLA")
 
     
 def interface(mapa_atual):
