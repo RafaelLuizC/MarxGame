@@ -200,7 +200,7 @@ jogador = Jogador("Fulano", carisma=5, forca=5, agilidade=5, sorte=5)
 
 def trabalhar_duro(jogador, mapa):
     aleatoriedade = random.randint(1, 10)
-    mapa.set_camaradas(-aleatoriedade)
+    mapa.set_camaradas(50)
     mapa.set_detec_comunista(-(jogador.get_forca())*2)
     func_janela_texto("A produção sobe consideravelmente graças ao seu empenho, mas as pausas para conversas amigáveis ficam escassas. Os colegas notam a mudança.", "AGUARDAR_TECLA")
 
@@ -359,6 +359,117 @@ def game_over_check(mapa):
         func_janela_ASCII("GAME OVER",True,10,"epic")
         return True
 
+# Jogo de adivinhação
+questoes = {
+    "Fabrica": {
+        "pergunta": "O que é, o que é: Detenho capital, domino os meios de produção, acumulo riqueza, controlo os setores comerciais e industriais, e exerço influência na política. Quem sou eu? ",
+        "resposta": "burguesia"
+    },
+    "Loja": {
+        "pergunta": "O que é, o que é, que representa a luta diária pela sobrevivência através do trabalho árduo e, no contexto social, é a força impulsionadora da classe que vende sua mão de obra? ",
+        "resposta": "proletariado"
+    },
+    "Escritorio": {
+        "pergunta": "Sou um sistema ideal, onde a propriedade é coletiva, e a distribuição é baseada nas necessidades individuais. O que sou? ",
+        "resposta": "comunismo"
+    },
+    "Gerencia": {
+        "pergunta": "O que é, refere-se a um fenômeno social de tensão ou antagonismo que existe entre pessoas ou grupos de diferentes classes sociais? ",
+        "resposta": "Luta de classes"
+    },
+    "Alta Cúpula da Empresa": {
+        "pergunta": "Minha presença é evidente na especialização de funções e tarefas na sociedade, frequentemente levando à alienação e desigualdades. O que sou? ",
+        "resposta": "Divisão do Trabalho"
+    },
+    "greve": [
+        {
+            "pergunta": "O que é o que é? Foi concebida por Marx, refere-se à separação ou distanciamento dos trabalhadores em relação ao produto do seu trabalho, ao processo de trabalho e até mesmo em relação a sua própria humanidade. É um fenômeno que ocorre nas sociedades capitalistas.",
+            "resposta": "Alienação"
+        },
+        {
+            "pergunta": "Sou o valor extra extraído do trabalho dos operários, representando a exploração inerente ao sistema econômico. O que sou? ",
+            "resposta": "Mais Valia"
+        },
+        {
+            "pergunta": "O que é, sou um processo de transformação social e política que busca estabelecer uma sociedade baseada nos princípios do socialismo.",
+            "resposta": "Revolução Socialista"
+        }
+    ]
+}
+
+def func_janela_texto_com_valor(texto):
+    # Inicializa a janela
+    stdscr = curses.initscr()
+
+    # Desativa o modo de caractere de eco para que a entrada do usuário não seja exibida na tela
+    curses.noecho()
+
+    # Obtém as dimensões da janela
+    height, width = stdscr.getmaxyx()
+
+    # Divide o texto em linhas
+    lines = textwrap.wrap(texto, width - 20)
+
+    # Calcula a linha inicial para centralizar o texto verticalmente
+    start_line = (height - len(lines)) // 2
+
+    # Limpa a janela
+    stdscr.clear()
+
+    # Imprime cada linha do texto
+    for i, line in enumerate(lines):
+        # Calcula a coluna inicial para centralizar o texto horizontalmente
+        start_col = (width - len(line)) // 2
+
+        # Imprime a linha na posição calculada
+        stdscr.addstr(start_line + i, start_col, line)
+
+    # Obtém a entrada do usuário
+    instrucao = "Digite um valor e pressione Enter:"
+    start_col_instrucao = (width - len(instrucao)) // 2
+    stdscr.addstr(start_line + len(lines) + 1, start_col_instrucao, instrucao)
+    curses.echo()
+    valor_digitado = stdscr.getstr(start_line + len(lines) + 2, start_col_instrucao).decode('utf-8')
+    curses.noecho()
+
+
+    # Finaliza a janela
+    curses.endwin()
+
+    return valor_digitado
+
+def jogo_adivinhacao(questao, texto_inicial="Para adentrar a este mapa você deve passar em um teste de conceito para mostrar seus conhecimentos."):
+    if texto_inicial:
+        func_janela_texto(texto_inicial, "AGUARDAR_TECLA")
+    
+    pergunta = questao['pergunta']
+    resposta = questao['resposta']
+    
+    resposta_correta_tratada = resposta.lower().replace(" ", "")
+    tentativas = 3
+    while True:
+        
+        os.system('cls')
+        
+        if tentativas <= 0:
+            func_janela_ASCII("Voce falhou!",True,5,1)
+            func_janela_ASCII("GAME OVER",True,10,"epic")
+            return False
+        
+        resposta_usuario = func_janela_texto_com_valor(pergunta)
+        resposta_usuario_tratada = resposta_usuario.lower().replace(" ", "")
+        
+        
+        if not resposta_usuario_tratada.isalpha():
+            pass
+        elif resposta_usuario_tratada.find(resposta_correta_tratada) != -1:
+            func_janela_texto(f"Parabéns pelo acerto! Agora está na hora de continuar sua jornada.", "AGUARDAR_TECLA")
+            return True
+        else:
+            tentativas-=1
+            plural = "s" if tentativas > 1 else ""
+            func_janela_texto(f"Poxa, a resposta não é '{resposta_usuario}', continue tentando!", "AGUARDAR_TECLA")
+            func_janela_texto(f"Você possui mais {tentativas} tentativa{plural}.", "AGUARDAR_TECLA")
 
 def main():
     for mapa in lista_de_mapas:
@@ -372,30 +483,60 @@ def main():
             func_janela_ASCII("Parte 3 : Momento de Agir",True,3,0)
             func_janela_texto(introducao_fulano_part_4,"AGUARDAR_TECLA")
             func_janela_texto(introducao,"AGUARDAR_TECLA")
+            if not jogo_adivinhacao(questoes[mapa.get_nome_mapa()]):
+                break
             func_janela_texto(momento_1,"AGUARDAR_TECLA")
+            
             if func_inicializar_mapa(mapa) == True:
                 break
+        
         if mapa.get_nome_mapa() == "Loja":
+            if not jogo_adivinhacao(questoes[mapa.get_nome_mapa()]):
+                break
             func_janela_ASCII("Loja",True,4,1)
             func_janela_texto(momento_2,"AGUARDAR_TECLA")
             if func_inicializar_mapa(mapa) == True:
                 break
         if mapa.get_nome_mapa() == "Escritorio":
+            if not jogo_adivinhacao(questoes[mapa.get_nome_mapa()]):
+                break
             func_janela_ASCII("Escritorio",True,4,1)
             func_janela_texto(momento_3,"AGUARDAR_TECLA")
             if func_inicializar_mapa(mapa) == True:
                 break
         if mapa.get_nome_mapa() == "Gerencia":
+            if not jogo_adivinhacao(questoes[mapa.get_nome_mapa()]):
+                break
             func_janela_ASCII("Gerencia",True,4,1)
             func_janela_texto(momento_4,"AGUARDAR_TECLA")
             if func_inicializar_mapa(mapa) == True:
                 break
         if mapa.get_nome_mapa() == "Alta Cúpula da Empresa":
+            if not jogo_adivinhacao(questoes[mapa.get_nome_mapa()]):
+                break
             func_janela_ASCII("A Presidencia",True,4,1)
             func_janela_texto(momento_5,"AGUARDAR_TECLA")
             if func_inicializar_mapa(mapa) == True:
                 break
-        
+            
+            func_janela_texto("Você finalmente chegou aqui, você está a um passo de conquistar os meio de produção, falta um ultimo teste para conquistar seu objetivo.", "AGUARDAR_TECLA")
+            func_janela_ASCII("O ultimo passo",True,4,1)
+            func_janela_texto("Agora você tera que responder 3 dificieis enigmas, que escondem um profundo siginificado. Após concluir os enigmas, sua vitoria será garantida!", "AGUARDAR_TECLA")
+            
+            perdeu = False
+            for questao in questoes["greve"]:
+                if not jogo_adivinhacao(questao, texto_inicial=False):
+                    func_janela_texto("Você escorreu no ultimo passo, acabou sendo pego. Foi por muito pouco.", "AGUARDAR_TECLA")
+                    func_janela_ASCII("Voce falhou!",True,5,1)
+                    func_janela_ASCII("GAME OVER",True,10,"epic")
+                    perdeu = True
+                    break
+                
+            if not perdeu:
+                func_janela_texto("Parabéns camarada! Após uma longa jornada você conseguiu se infiltrar no sistema e derrubar a ditadura da burguesia. Você trouxe paz e liberdade para nossa sociedade, obrigado!", "AGUARDAR_TECLA")
+                func_janela_ASCII("Você completou o jogo!",True,5,1)
+            
+            break
 
 ##############################################################################################
 
