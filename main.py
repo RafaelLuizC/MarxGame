@@ -175,7 +175,7 @@ def checador_de_conclusao(objeto_mapa):
     else:
         return False
 
-def print_hud(objeto_mapa):
+def print_hud(objeto_mapa,jogador):
     print("-" * 130)
     print ("\n\n\n")
 
@@ -252,12 +252,12 @@ def greve(mapa):
         func_janela_texto("A greve foi um fracasso... Os gestores não cederam as demandas dos trabalhadores e a empresa continuou um lugar ruim para se trabalhar.", "AGUARDAR_TECLA")
 
     
-def interface(mapa_atual):
+def interface(mapa_atual,):
     status_menu = True
     options = mapa_atual.get_lista_mapa() #Recebe o item da lista do mapa.
     selected_option = 0 #Valor que corresponde a qual item esta selecionado
 
-    print_hud(mapa_atual)
+    print_hud(mapa_atual,jogador)
 
     while True:
         if status_menu == True:
@@ -268,7 +268,7 @@ def interface(mapa_atual):
         # Limpar a tela
         os.system('cls')
         
-        print_hud(mapa_atual)
+        print_hud(mapa_atual,jogador)
 
         # Exibir as opções do menu
 
