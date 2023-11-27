@@ -62,14 +62,4 @@ def realizar_atividade_extrema(status_personagem, dificuldade_mapa):
 # print("Resultado:", resultado)
 
 
-class jog:
-    def __init__(self) -> None:
-        self.teste = 0
-        
-    def setTeste(self, teste):
-        self.teste += teste
-        
-j = jog()
-
-
     
