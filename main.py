@@ -40,16 +40,16 @@ class Mapa():
         self.camaradas_conquistados = (self.camaradas_conquistados + soma_valor)
 
     def set_detec_comunista(self,novo_valor):
-        if novo_valor < 0:
-            self.detec_comunista = (self.detec_comunista - novo_valor)
-        else:
-            self.detec_comunista = (self.detec_comunista + novo_valor)
+        # if novo_valor < 0:
+        #     self.detec_comunista = (self.detec_comunista - novo_valor)
+        # else:
+        self.detec_comunista = (self.detec_comunista + novo_valor)
 
 class Jogador():
-    def __init__(self,nome,carisma,força,agilidade,sorte):
+    def __init__(self,nome,carisma,forca,agilidade,sorte):
         self.nome = nome
         self.carisma = carisma
-        self.força = força
+        self.forca = forca
         self.agilidade = agilidade
         self.sorte = sorte
 
@@ -59,15 +59,23 @@ class Jogador():
     def get_carisma(self):
         return self.carisma
     
-    def get_força(self):
-        return self.força
+    def get_forca(self):
+        return self.forca
 
     def get_agilidade(self):
         return self.agilidade
     
     def get_sorte(self):
         return self.sorte
+    
+    def set_agilidade(self, agilidade):
+        self.agilidade += agilidade
 
+    def set_carisma(self, carisma):
+        self.carisma += carisma
+    
+    def set_forca(self, forca):
+        self.forca += forca
 ###################
 
 def func_janela_texto(text,tempo_sleep):
@@ -167,29 +175,91 @@ def func_janela_ASCII(text,gerar_ascii,tempo_sleep):
     # Finaliza a janela
     curses.endwin()
 
-
 def checador_de_conclusao(objeto_mapa):
     if (objeto_mapa.get_porcentagem_concluida()) >= 100:
         return True
     else:
         return False
 
-def print_hud(objeto_mapa):
+def print_hud(objeto_mapa, objeto_jogador):
     print ("\n\n")
 
     print (f'Local: {objeto_mapa.get_nome_mapa()}\n')
     print (f'Trabalhadores: {objeto_mapa.get_camaradas_totais()}\n')
     print (f'Porcentagem Camarada: {objeto_mapa.get_porcentagem_concluida()}\n')
     print (f'Detector de Comunistas: {objeto_mapa.get_detec_comunista()}')
-
+    print("_______________________________________________________________________")
+    print(f'Carisma: {objeto_jogador.get_carisma()}')
+    print(f'Força: {objeto_jogador.get_forca()}')
+    print(f'Agilidade: {objeto_jogador.get_agilidade()}')
     print ("\n\n")
+     
+## Objeto Jogador Teste
+jogador = Jogador("Fulano", carisma=5, forca=5, agilidade=5, sorte=5)
+### Ações possiveis no jogo
+# ["Produção Intensiva","Desmontar Máquinas de Forma Sutil","Espalhar Ideias Subversivas", "Organizar Greves Setoriais","Voltar]
+def trabalhar_duro(jogador, mapa):
+    
+    
+    mapa.set_camaradas(-2)
+    mapa.set_detec_comunista(-2)
 
+def sabotagem(jogador, mapa):  
+    sorte = jogador.get_sorte() / 10
+    agilidade = jogador.get_agilidade()
+    
+    status = ( (agilidade * 4 ) + ( sorte * 6 ) ) / 10
+    aleatoriedade = random.randint(1, 10)
+    
+    if aleatoriedade <= status:
+        mapa.set_camaradas(5)
+        os.system('cls')
+        input(f"Ninguem viu sua sabotagem, somente os camaradas!Você ganhou pontos com eles, bom trabalho!\n")
+    else:
+        mapa.set_camaradas(1)
+        mapa.set_detec_comunista(5)
+        os.system('cls')
+        input("Você foi pego durante a sabotagem... Os camaradas ficaram mais desmotivados em seguir você.")
+    jogador.set_agilidade(0.1)
+        
+def discurso(jogador, mapa):
+    carisma = jogador.get_carisma()
+    sorte = jogador.get_sorte()
+    
+    status = ( (carisma * 4 ) + ( sorte * 6 ) ) / 10
+    aleatoriedade = random.randint(1, 10)
+    
+    if aleatoriedade <= status: 
+        mapa.set_camaradas(5)
+        os.system('cls')
+        input("Ótimo discurso! Os camaradas se sentiram mais motivados em seguir suas ideias.\n")
+    else:
+        mapa.set_detec_comunista(5) 
+        mapa.set_camaradas(1)
+        input("Péssimo discurso...\n\nVocê se perdeu nas palavras, os camaradas não gostaram das ideias e acabaram reportando os gestores.\n")
+        
+    jogador.set_carisma(0.1)
+
+def greve(jogador, lista_mapas, lista_mapas_concluidos):
+    
+    if len(lista_mapas) == (lista_mapas_concluidos):
+        
+        ## Tem 10% de chance de dar ruim    
+        aleatoriedada = random.randint(1, 10)
+        
+        if aleatoriedada == 1:
+            return False
+        else:
+            return True 
+    else:
+        return False
+    
 def interface(mapa_atual):
     status_menu = True
     options = mapa_atual.get_lista_mapa() #Recebe o item da lista do mapa.
     selected_option = 0 #Valor que corresponde a qual item esta selecionado
 
-    print_hud(mapa_atual)
+    print_hud(mapa_atual, jogador)
 
     while True:
         if status_menu == True:
@@ -200,7 +270,7 @@ def interface(mapa_atual):
         # Limpar a tela
         os.system('cls')
         
-        print_hud(mapa_atual)
+        print_hud(mapa_atual, jogador)
 
         # Exibir as opções do menu
 
@@ -236,32 +306,28 @@ def interface(mapa_atual):
                     mapa_atual = fabrica
                     status_menu = (True if status_menu == False else False)
                 else:
-                    print("Opção 1 selecionada")
-                    mapa_atual.set_camaradas(10)
-
+                    trabalhar_duro(jogador, mapa_atual)
             elif selected_option == 1:
                 if status_menu == False:
                     mapa_atual = loja
                     status_menu = (True if status_menu == False else False)
                 else:
-                    print("Opção 2 selecionada")
-                    # BEGIN: Opção 2 DO JOGO
+                    sabotagem(jogador, mapa_atual)
 
             elif selected_option == 2:
                 if status_menu == False:
                     mapa_atual = escritorio
                     status_menu = (True if status_menu == False else False)
                 else:
-                    print("Opção 3 selecionada")
-                    # BEGIN: Opção 3 DO JOGO                    
+                    discurso(jogador, mapa_atual)                   
 
             elif selected_option == 3:
                 if status_menu == False:
                     mapa_atual = gerencia
                     status_menu = (True if status_menu == False else False)
                 else:
-                    print("Opção 4 selecionada")
-                    # BEGIN: Opção 4 DO JOGO
+                    greve(jogador, lista_de_mapas, mapas_concluidos)
+                    
             elif selected_option == 4:
                 if status_menu == False:
                     mapa_atual = chefes
