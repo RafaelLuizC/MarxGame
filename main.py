@@ -184,9 +184,9 @@ def print_hud(objeto_mapa,jogador):
     print (f'   Porcentagem Camarada: {objeto_mapa.get_porcentagem_concluida()}.% {"/"} 100.%')
     print (f'   Detector de Comunistas: {objeto_mapa.get_detec_comunista()} [{"x"*(objeto_mapa.get_detec_comunista()//10)+" "*((100-objeto_mapa.get_detec_comunista())//10)}]')
     print("-" * 130)
-    print (f'   Pontos de Carisma: {jogador.get_carisma()}')
+    print (f'   Pontos de Carisma: {round(jogador.get_carisma(), 2)}')
     print (f'   Pontos de Força: {jogador.get_forca()}')
-    print (f'   Pontos de Agilidade: {jogador.get_agilidade()}')
+    print (f'   Pontos de Agilidade: {round(jogador.get_agilidade(), 2)}')
     print (f'   Pontos de Sorte: {jogador.get_sorte()}')
     
     print ("\n")
@@ -200,7 +200,7 @@ jogador = Jogador("Fulano", carisma=5, forca=5, agilidade=5, sorte=5)
 
 def trabalhar_duro(jogador, mapa):
     aleatoriedade = random.randint(1, 10)
-    mapa.set_camaradas(-aleatoriedade)
+    mapa.set_camaradas(50)
     mapa.set_detec_comunista(-(jogador.get_forca())*2)
     func_janela_texto("A produção sobe consideravelmente graças ao seu empenho, mas as pausas para conversas amigáveis ficam escassas. Os colegas notam a mudança.", "AGUARDAR_TECLA")
 
@@ -218,7 +218,8 @@ def sabotagem(jogador, mapa):
         mapa.set_camaradas(aleatoriedade*3)
         mapa.set_detec_comunista(aleatoriedade*3)
         func_janela_texto("Você foi pego durante a sabotagem... Os camaradas ficaram mais desmotivados em seguir você.", "AGUARDAR_TECLA")
-    jogador.set_agilidade(1)
+    
+    jogador.set_agilidade(0.2)
         
 def discurso(jogador, mapa):
     carisma = jogador.get_carisma()
@@ -235,7 +236,7 @@ def discurso(jogador, mapa):
         mapa.set_camaradas(aleatoriedade)
         func_janela_texto("Péssimo discurso...\n\nVocê se perdeu nas palavras, os camaradas não gostaram das ideias e acabaram reportando os gestores.\n", "AGUARDAR_TECLA")
         
-    jogador.set_carisma(1)
+    jogador.set_carisma(0.2)
 
 def greve(mapa):
 
@@ -313,12 +314,14 @@ def interface(mapa_atual,):
                     mapa_atual = fabrica
                     status_menu = (True if status_menu == False else False)
                 else:
+                    os.system('cls')
                     trabalhar_duro(jogador, mapa_atual)
             elif selected_option == 1:
                 if status_menu == False:
                     mapa_atual = loja
                     status_menu = (True if status_menu == False else False)
                 else:
+                    os.system('cls')
                     sabotagem(jogador, mapa_atual)
 
             elif selected_option == 2:
@@ -326,6 +329,7 @@ def interface(mapa_atual,):
                     mapa_atual = escritorio
                     status_menu = (True if status_menu == False else False)
                 else:
+                    os.system('cls')
                     discurso(jogador, mapa_atual)                   
 
             elif selected_option == 3:
@@ -333,6 +337,7 @@ def interface(mapa_atual,):
                     mapa_atual = gerencia
                     status_menu = (True if status_menu == False else False)
                 else:
+                    os.system('cls')
                     greve(mapa_atual)
                     
             elif selected_option == 4:
